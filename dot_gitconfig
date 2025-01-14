@@ -1,0 +1,32 @@
+[user]
+	name = kuuumo
+	email = 0418ya@gmail.com
+[core]
+	excludesfile = /Users/sugitahayato/.gitignore_global
+[difftool "sourcetree"]
+	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
+	path = 
+[mergetool "sourcetree"]
+	cmd = /Users/sugitahayato/Applications/Sourcetree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
+	trustExitCode = true
+[commit]
+	template = /Users/sugitahayato/.stCommitMsg
+[pull]
+	rebase = false
+
+[alias]
+	delete-merged-branch = !git branch --merged | egrep -v '\\*|master|development' | xargs git branch -d
+	openpr = "!f() { gh browse -- `git log --merges --oneline --reverse --ancestry-path $1...master | grep 'Merge pull request #' | head -n 1 | cut -f5 -d' ' | sed -e 's%#%%'`; }; f"
+
+[push]
+	default = current
+[filter "lfs"]
+	required = true
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+[init]
+	defaultBranch = master
+[diff "lockb"]
+	textconv = bun
+	binary = true
