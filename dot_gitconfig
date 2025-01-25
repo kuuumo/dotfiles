@@ -3,6 +3,7 @@
 	email = 0418ya@gmail.com
 [core]
 	excludesfile = /Users/sugitahayato/.gitignore_global
+	editor = vim
 [difftool "sourcetree"]
 	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
 	path = 
