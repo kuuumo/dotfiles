@@ -63,6 +63,8 @@ tap 1password/tap
 tap abue-ammar/tinycast
 cask tinycast
 
+tap asmvik/formulae
+
 tap aws/tap
 
 tap dotenvx/brew
@@ -77,8 +79,6 @@ tap go-task/tap
 cask go-task
 
 tap hashicorp/tap
-
-tap koekeishiya/formulae
 
 tap macpaw/taps
 
