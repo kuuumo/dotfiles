@@ -2,6 +2,11 @@
 
 set -euo pipefail
 
+# setup-mac.zshが後処理を明示的に呼び出すため、chezmoi apply中は二重実行しません。
+if [[ "${DOTFILES_SKIP_BREWFILE_RESTORE:-0}" == "1" ]]; then
+  exit 0
+fi
+
 # 初回適用時にHomebrewがPATHにない場合は、標準の配置先からPATHを設定します。
 if ! command -v brew >/dev/null 2>&1; then
   if [[ -x /opt/homebrew/bin/brew ]]; then
