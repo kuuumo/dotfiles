@@ -53,6 +53,7 @@ cask aws-vault
 cask claude-code
 cask cleanmymac-cli
 cask codex
+cask font-jetbrains-mono-nerd-font
 cask gcloud-cli
 cask ghostty
 cask homebrew-app
