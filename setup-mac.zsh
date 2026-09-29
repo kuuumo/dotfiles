@@ -25,9 +25,10 @@ for extension in toml yaml json jsonc; do
   fi
 done
 
-if [[ "$has_chezmoi_config" == false && ! -r "$default_age_identity" ]]; then
+if [[ ! -r "$default_age_identity" ]]; then
   fail "age秘密鍵を $default_age_identity に戻してから再実行してください。"
 fi
+chmod 600 "$default_age_identity"
 
 install_homebrew_if_missing() {
   if command -v brew >/dev/null 2>&1 || [[ -x /opt/homebrew/bin/brew ]] || [[ -x /usr/local/bin/brew ]]; then

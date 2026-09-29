@@ -5,7 +5,7 @@ Macの設定とHomebrewのパッケージ一覧を管理します。移行アシ
 ## 新しいMacのセットアップ
 
 1. Apple AccountとMac App Storeにサインインします。移行アシスタントを使う場合は、先に移行を完了してください。
-2. age秘密鍵を安全な保管先から `~/.chezmoi-encrypt-key.txt` に戻します。鍵をGitHubやiCloud Driveには置きません。chezmoiの設定がなければ、スクリプトが作成します。
+2. age秘密鍵を1Passwordの自分専用Vaultにファイルとして保管し、新しいMacでは `~/.chezmoi-encrypt-key.txt` に戻します。スクリプトがファイルのアクセス権を自分だけに設定します。鍵をGitHubやiCloud Driveには置きません。chezmoiの設定がなければ、スクリプトが作成します。
 3. スクリプトを確認して実行します。
 
    ```zsh
