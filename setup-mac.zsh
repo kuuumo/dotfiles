@@ -102,7 +102,7 @@ esac
 
 identity_download="$(mktemp "$HOME/.chezmoi-encrypt-key.XXXXXX")" || fail "一時ファイルを作成できません。"
 chmod 600 "$identity_download"
-if ! "$op_path" document get "$age_identity_document_name" --out-file "$identity_download" --file-mode 0600; then
+if ! "$op_path" document get "$age_identity_document_name" --out-file "$identity_download" --file-mode 0600 --force; then
   rm -f "$identity_download"
   fail "1Passwordから鍵を取得できませんでした。1Passwordアプリへサインインし、CLI連携を有効にして、タイトルが $age_identity_document_name の書類を確認してください。"
 fi
