@@ -5,8 +5,9 @@ Macの設定とHomebrewのパッケージ一覧を管理します。移行アシ
 ## 新しいMacのセットアップ
 
 1. Apple AccountとMac App Storeにサインインします。移行アシスタントを使う場合は、先に移行を完了してください。
-2. age秘密鍵を1Passwordなどの安全な保管先から `~/.chezmoi-encrypt-key.txt` に戻します。セットアップスクリプトはこのファイルだけを参照し、アクセス権を自分だけに設定します。鍵をGitHubやiCloud Driveには置きません。chezmoiの設定がなければ、スクリプトが作成します。
-3. スクリプトを確認して実行します。
+2. 1Passwordアプリをインストールしてサインインし、設定の「開発者」から[1Password CLI連携](https://developer.1password.com/docs/cli/app-integration/)を有効にします。セットアップ時に認証を求められたら、1Passwordで許可してください。CLI本体はセットアップスクリプトがHomebrewからインストールします。
+3. age秘密鍵のファイル全体を、1Passwordの「書類」としてタイトル `chezmoi-encrypt-key.txt` で保存します。タイトルが同じ書類を複数作らないでください。スクリプトは秘密鍵の形式と公開鍵コメントを確認します。鍵をGitHubやiCloud Driveには置きません。
+4. スクリプトを確認して実行します。
 
    ```zsh
    curl -fsSL https://raw.githubusercontent.com/kuuumo/dotfiles/master/setup-mac.zsh -o /tmp/setup-mac.zsh
@@ -14,7 +15,9 @@ Macの設定とHomebrewのパッケージ一覧を管理します。移行アシ
    zsh /tmp/setup-mac.zsh
    ```
 
-スクリプトはHomebrewとchezmoiを準備し、既存の管理元は未コミットの変更がなくmaster上の場合だけGitHubから更新します。復号と差分を確認してから適用し、Brewfileにある項目をインストールします。Brewfileにないものは削除しません。復元に失敗したら同じスクリプトを再実行してください。
+スクリプトはHomebrewと1Password CLIを準備し、1Passwordから鍵を取得して `~/.chezmoi-encrypt-key.txt` にアクセス権を本人だけにして配置します。既存の鍵も1Passwordの内容に更新し、設定を復号できることを確認します。復号できなければ、既存の鍵を元に戻します。鍵の内容は画面に表示しません。
+
+その後、chezmoiを準備します。既存の管理元は未コミットの変更がなくmaster上の場合だけGitHubから更新します。適用前に復号結果と差分を確認します。適用するとBrewfileにある項目をインストールしますが、Brewfileにないものは削除しません。復元に失敗したら同じスクリプトを再実行してください。
 
 移行した `~/.config/chezmoi/chezmoi.toml` はそのまま使います。`[git]` の `autoCommit` と `autoPush` が有効なら、新しいMacでも自動コミット・プッシュが続くため、実行前に確認してください。
 

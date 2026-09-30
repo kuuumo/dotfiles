@@ -5,11 +5,30 @@ set -euo pipefail
 readonly homebrew_install_url="https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh"
 readonly default_age_identity="$HOME/.chezmoi-encrypt-key.txt"
 readonly default_age_recipient="age1yd7l6ys8ads6tgradk06un7sg3aye80lufqjkcua6zhqftlh2scqlrvh0d"
+readonly age_identity_document_name="chezmoi-encrypt-key.txt"
 
 fail() {
   print -u2 -- "エラー: $*"
   exit 1
 }
+
+identity_backup_path=""
+identity_replacement_pending=false
+
+rollback_age_identity() {
+  local exit_status=$?
+  if [[ "$identity_replacement_pending" == true ]]; then
+    if [[ -n "$identity_backup_path" && -f "$identity_backup_path" ]]; then
+      mv -f "$identity_backup_path" "$default_age_identity"
+      chmod 600 "$default_age_identity"
+    else
+      rm -f "$default_age_identity"
+    fi
+  fi
+  return "$exit_status"
+}
+
+trap rollback_age_identity EXIT
 
 if [[ "$(uname -s)" != "Darwin" ]]; then
   fail "このスクリプトはmacOS用です。"
@@ -24,11 +43,6 @@ for extension in toml yaml json jsonc; do
     break
   fi
 done
-
-if [[ ! -r "$default_age_identity" ]]; then
-  fail "age秘密鍵を $default_age_identity に戻してから再実行してください。"
-fi
-chmod 600 "$default_age_identity"
 
 install_homebrew_if_missing() {
   if command -v brew >/dev/null 2>&1 || [[ -x /opt/homebrew/bin/brew ]] || [[ -x /usr/local/bin/brew ]]; then
@@ -67,6 +81,55 @@ if ! grep -Fqx "$brew_shellenv" "$HOME/.zprofile" 2>/dev/null; then
   printf '\n%s\n' "$brew_shellenv" >> "$HOME/.zprofile"
 fi
 eval "$("$local_brew" shellenv)"
+
+if [[ -L "$default_age_identity" || ( -e "$default_age_identity" && ! -f "$default_age_identity" ) ]]; then
+  fail "$default_age_identity は通常のファイルではありません。内容を確認してください。"
+fi
+
+op_path="$(command -v op 2>/dev/null || true)"
+if [[ -z "$op_path" ]]; then
+  print "1Password CLIをHomebrewからインストールします。"
+  brew install --cask 1password-cli || fail "1Password CLIをインストールできませんでした。"
+  op_path="$(command -v op 2>/dev/null || true)"
+fi
+[[ -n "$op_path" ]] || fail "1Password CLIの op コマンドが見つかりません。"
+
+op_version="$("$op_path" --version 2>/dev/null || true)"
+case "$op_version" in
+  2.*) ;;
+  *) fail "1Password CLI 2が必要です。CLIを更新してから再実行してください。" ;;
+esac
+
+identity_download="$(mktemp "$HOME/.chezmoi-encrypt-key.XXXXXX")" || fail "一時ファイルを作成できません。"
+chmod 600 "$identity_download"
+if ! "$op_path" document get "$age_identity_document_name" --out-file "$identity_download" --file-mode 0600; then
+  rm -f "$identity_download"
+  fail "1Passwordから鍵を取得できませんでした。1Passwordアプリへサインインし、CLI連携を有効にして、タイトルが $age_identity_document_name の書類を確認してください。"
+fi
+
+if ! grep -Eq '^AGE-SECRET-KEY-1[0-9A-Z]+$' "$identity_download" || ! grep -Fqx "# public key: $default_age_recipient" "$identity_download"; then
+  rm -f "$identity_download"
+  fail "1Passwordから取得した鍵が、このリポジトリのage受信者と一致しません。正しい鍵ファイルを確認してください。"
+fi
+
+if [[ -f "$default_age_identity" ]]; then
+  identity_backup_path="$(mktemp "$HOME/.chezmoi-encrypt-key.backup.XXXXXX")" || {
+    rm -f "$identity_download"
+    fail "既存の鍵を退避する一時ファイルを作成できません。"
+  }
+  if ! cp -p "$default_age_identity" "$identity_backup_path"; then
+    rm -f "$identity_backup_path" "$identity_download"
+    identity_backup_path=""
+    fail "既存の鍵を安全に退避できませんでした。"
+  fi
+fi
+
+identity_replacement_pending=true
+if ! mv -f "$identity_download" "$default_age_identity"; then
+  rm -f "$identity_download"
+  fail "1Passwordから取得した鍵を配置できませんでした。"
+fi
+chmod 600 "$default_age_identity"
 
 if ! command -v chezmoi >/dev/null 2>&1; then
   brew install chezmoi
@@ -115,7 +178,15 @@ source_dir="$(chezmoi source-path)"
 [[ -f "$source_dir/run_once_after_install_brew.sh" ]] || fail "Brewfile復元スクリプトが見つかりません: $source_dir"
 
 print "暗号化された設定を復号できるか確認します。"
-chezmoi cat "$HOME/.zshrc" >/dev/null
+if ! chezmoi cat "$HOME/.zshrc" >/dev/null; then
+  fail "1Passwordから取得した鍵で設定を復号できませんでした。既存の鍵がある場合は元に戻しました。"
+fi
+
+identity_replacement_pending=false
+if [[ -n "$identity_backup_path" ]]; then
+  rm -f "$identity_backup_path"
+  identity_backup_path=""
+fi
 
 print
 print "適用予定の変更を確認してください。"
