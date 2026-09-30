@@ -38,7 +38,7 @@ brew postgresql@18
 brew python@3.14
 brew readline
 brew ripgrep
-brew sdl2
+brew sdl2-compat
 brew sdl3
 brew sqlite
 brew svt-av1
@@ -49,25 +49,16 @@ brew zstd
 
 tap homebrew/cask
 cask 1password-cli
-cask aws-vault
+cask aws-vault-binary
 cask claude-code
-cask cleanmymac-cli
 cask codex
 cask font-jetbrains-mono-nerd-font
 cask gcloud-cli
 cask ghostty
 cask homebrew-app
 
-tap 1password/tap
-
 tap abue-ammar/tinycast
 cask tinycast
-
-tap asmvik/formulae
-
-tap aws/tap
-
-tap dotenvx/brew
 
 tap ducksss/tap
 brew codex-profile --HEAD
@@ -78,14 +69,11 @@ brew sentry-cli
 tap go-task/tap
 cask go-task
 
-tap hashicorp/tap
-
 tap macpaw/taps
+cask cleanmymac-cli
 
 tap rcmdnk/file
 brew brew-file
-
-tap stripe/stripe-cli
 
 # App Store applications
 appstore 1569813296 1Password for Safari (8.12.37)
